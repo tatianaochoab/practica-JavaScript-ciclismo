@@ -13,6 +13,7 @@ var arrayCiclistas = [];
 let convertirArray = () => {
 
     if (localStorage.getItem('ciclistas') != null) {
+
         let elementJson = JSON.parse(localStorage.getItem('ciclistas'));
         arrayCiclistas = elementJson.map((elemento) => {
             let newCiclista = Object.create(Ciclista);
@@ -30,7 +31,7 @@ let convertirArray = () => {
         premiarCiclistas();
     }
 };
-
+//Funcion para crear un ciclista nuevo y agregarlo al arreglo, internamnete crea un nuevo objeto que recibe los valores
 let crearCiclista = (nombre, tiempoEt1, tiempoEt2, tiempoEt3, tiempoEt4, tiempoEt5) => {
     //crear un objeto nuevo a partir de otro objeto de tipo Ciclista
     let newCiclista = Object.create(Ciclista);
@@ -43,16 +44,20 @@ let crearCiclista = (nombre, tiempoEt1, tiempoEt2, tiempoEt3, tiempoEt4, tiempoE
     newCiclista.promedio = (tiempoEt1 + tiempoEt2 + tiempoEt3 + tiempoEt4 + tiempoEt5) / 5;
     arrayCiclistas.push(newCiclista);
 }
-
+//Función que crea un nuevo arreglo ordenado por promedio, a partir del arreglo inicial arrayCiclistas
 let ordenarCiclistas = () => {
-    let ciclistas = arrayCiclistas.sort((ciclista1, ciclista2) => {
+
+
+    var mapped = arrayCiclistas.map(elemento => elemento);
+    mapped.sort((ciclista1, ciclista2) => {
         return ciclista1.promedio - ciclista2.promedio;
     });
-    return ciclistas;
-}
 
+    return mapped;
+}
+//Funcion que calcula el valor del premio segun las condiones propuestas
 let calcularPremio = (nombre, posicion) => {
-    let premio = 0;
+    let premio = "";
     let cantidad = nombre.length;
     switch (posicion) {
         case 0:
@@ -93,13 +98,13 @@ let calcularPremio = (nombre, posicion) => {
     }
     return premio;
 }
-
+//Introducir al DOM una tabla con la información de los ciclístas
 let cargarCiclistas = () => {
-    let HTML = "";
+    let contenido = "";
     //recorrer el arreglo
     for (let index = 0; index < arrayCiclistas.length; index++) {
         const element = arrayCiclistas[index];
-        HTML += `<tr>
+        contenido += `<tr>
                     <td>${index + 1}</td>
                     <td>${element.nombre}</td>
                     <td>${element.tiempoEt1}</td>
@@ -110,29 +115,29 @@ let cargarCiclistas = () => {
                     <td><a href"#">Acciones</a></td>
                 </tr>`;
     }
-    document.querySelector("#tbl-registro-tiempos tbody").innerHTML = HTML;
+    document.querySelector("#tbl-registro-tiempos tbody").innerHTML = contenido;
 }
 
 let cargarPromedios = () => {
-    let HTML = "";
+    let contenido = "";
     for (let index = 0; index < arrayCiclistas.length; index++) {
         const element = arrayCiclistas[index];
-        HTML += `<tr>
+        contenido += `<tr>
                     <td>${index + 1}</td>
                     <td>${element.nombre}</td>
                     <td>${element.promedio}</td>
                 </tr>`;
     }
-    document.querySelector("#tbl-promedio-tiempos tbody").innerHTML = HTML;
+    document.querySelector("#tbl-promedio-tiempos tbody").innerHTML = contenido;
 }
 
-document.getElementById("btn-agregar-reg-tiempo").addEventListener("click", (e) => {
+document.getElementById("btn-agregar-reg-tiempo").addEventListener("click", () => {
     document.getElementById("frm_nuevo_registro_tiempo").reset();
     $("#modalRegistroTiempo").modal("toggle");
 });
 
 
-document.getElementById("btn_guardar_nuevo_reg_tiempo").addEventListener("click", (e) => {
+document.getElementById("btn_guardar_nuevo_reg_tiempo").addEventListener("click", () => {
     if (document.getElementById("frm_nuevo_registro_tiempo").reportValidity()) {
 
         let nombreCiclista = document.getElementById("nombre_ciclista").value;
@@ -146,6 +151,7 @@ document.getElementById("btn_guardar_nuevo_reg_tiempo").addEventListener("click"
         localStorage.setItem('ciclistas', JSON.stringify(arrayCiclistas));
         cargarPromedios();
         premiarCiclistas();
+        document.getElementById("frm_nuevo_registro_tiempo").reset();
     }
 });
 
@@ -154,41 +160,55 @@ let premiarCiclistas = () => {
     let premio = "";
     let HTML = "";
     let element = ordenGanadores[0];
-    premio = calcularPremio(element.nombre, 0);
-    HTML = `<tr>
+    if (element != null) {
+        let nuevoNombre = element.nombre.toUpperCase();
+        premio = calcularPremio(element.nombre, 0);
+        HTML = `<tr>
                 <div class="p-2 w-100 bd-highlight">
-                    <p><b>Nombre: </b>${element.nombre}</p>
+                    <p><b>Nombre: </b>${nuevoNombre}</p>
                     <p><b>Tiempo: </b>${element.promedio}</p>
                     <h4><b>Premio: </b>${premio}</h4>
                 </div>
                 <img class="p-2 flex-shrink-1 bd-highlight img-fluid rounded float-right" src="/imagenes/medalla-oro.PNG" alt="Oro">
             </tr>`;
 
-    document.querySelector("#tbl-premios-oro tbody").innerHTML = HTML;
-    element = ordenGanadores[1];
-    premio = calcularPremio(element.nombre, 1);
-    HTML = `<tr>
+        document.querySelector("#tbl-premios-oro tbody").innerHTML = HTML;
+    }   
+
+    
+        element = ordenGanadores[1];
+        if (element != null) {
+        let nuevoNombre = element.nombre.toLowerCase();
+        premio = calcularPremio(element.nombre, 1);
+        HTML = `<tr>
                 <div class="p-2 w-100 bd-highlight">
-                    <p><b>Nombre: </b>${element.nombre}</p>
+                    <p><b>Nombre: </b>${nuevoNombre}</p>
                     <p><b>Tiempo: </b>${element.promedio}</p>
                     <h4><b>Premio: </b>${premio}</h4>
                 </div>
                 <img class="p-2 flex-shrink-1 bd-highlight img-fluid rounded float-right" src="/imagenes/medalla-plata.PNG" alt="Plata">
             </tr>`;
 
-    document.querySelector("#tbl-premios-plata tbody").innerHTML = HTML;
-    element = ordenGanadores[2];
-    premio = calcularPremio(element.nombre, 2);
-    HTML = `<tr>
-                <div class="p-2 w-100 bd-highlight">
-                    <p><b>Nombre: </b>${element.nombre}</p>
-                    <p><b>Tiempo: </b>${element.promedio}</p>
-                    <h4><b>Premio: </b>${premio}</h4>
-                </div>
-                <img class="p-2 flex-shrink-1 bd-highlight img-fluid rounded float-right" src="/imagenes/medalla-bronce.PNG" alt="Bronce">
-            </tr>`;
+        document.querySelector("#tbl-premios-plata tbody").innerHTML = HTML;
+        }
 
-    document.querySelector("#tbl-premios-bronce tbody").innerHTML = HTML;
+        element = ordenGanadores[2];
+        if (element != null) {
+        
+        let nuevoNombre = element.nombre[0].toUpperCase() + element.nombre.substring(1,element.nombre.length).toLowerCase();
+        
+        premio = calcularPremio(element.nombre, 2);
+        HTML = `<tr>
+            <div class="p-2 w-100 bd-highlight">
+            <p><b>Nombre: </b>${nuevoNombre}</p>
+            <p><b>Tiempo: </b>${element.promedio}</p>
+            <h4><b>Premio: </b>${premio}</h4>
+            </div>
+            <img class="p-2 flex-shrink-1 bd-highlight img-fluid rounded float-right" src="/imagenes/medalla-bronce.PNG" alt="Bronce">
+            </tr>`;
+            
+            document.querySelector("#tbl-premios-bronce tbody").innerHTML = HTML;
+        }
 }
 
 convertirArray();
